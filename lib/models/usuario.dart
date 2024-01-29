@@ -39,8 +39,8 @@ class Usuario {
         telefono: json["telefono"],
         imagen: json["imagen"],
         disponible: json["disponible"] == null ? null : json['disponible'],
-        sessionToken: json["session_token"] ?? json["session_token"],
-        roles: json['roles'] == null ? [] : List<Rol>.from(json['roles'].map( (model) => Rol.fromJson(model) )) ?? []
+        sessionToken: json["session_token"],
+        roles: json['roles'] == null ? [] : List<Rol>.from(json['roles'].map( (model) => Rol.fromJson(model) ))
     );
 
     Map<String, dynamic> toJson() => {

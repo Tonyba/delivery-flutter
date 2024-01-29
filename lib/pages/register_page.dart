@@ -31,7 +31,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final confirmPassController = TextEditingController();
 
   XFile? pickedFile;
-
   File? imageFile;
 
   @override
@@ -312,6 +311,7 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
+
 
   Future _selectImage(ImageSource imageSource) async {
     pickedFile = await ImagePicker().pickImage(source: imageSource);

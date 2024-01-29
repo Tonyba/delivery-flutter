@@ -10,8 +10,10 @@ final appTheme = ThemeData(
   colorScheme: ColorScheme.fromSwatch().copyWith(
     primary: MyColors.primaryColor
   ),
+  canvasColor: Colors.white,
   scaffoldBackgroundColor: Colors.white,
   appBarTheme: AppBarTheme(
+    elevation: 0,
     iconTheme: const IconThemeData(
       color: Colors.white
     ),

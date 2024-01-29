@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:delivery_flutter/models/usuario.dart';
 import 'package:delivery_flutter/global/enviroment.dart';
 import 'package:delivery_flutter/models/authResponse.dart';
+
+import 'package:delivery_flutter/main.dart';
 
 
 class UsuarioService  extends ChangeNotifier {
@@ -25,7 +28,6 @@ class UsuarioService  extends ChangeNotifier {
 
     void _initUser() async {
       String? savedUser = await getUser();
-      print(savedUser);
       if(savedUser != null && _usuario == null) {
         usuario = Usuario.fromJson(json.decode(savedUser));
       }
@@ -81,6 +83,37 @@ class UsuarioService  extends ChangeNotifier {
 
     }
 
+    Future getById(String id) async {
+
+      late var resp;
+
+      try {
+         var url = Uri.parse('${Environment.apiUrl}/user/findById/$id');
+         Map<String, String> headers = {
+          'Content-type' : 'application/json',
+          'Authorization': usuario?.sessionToken ?? ''
+         };
+
+          final res = await http.get(url, headers: headers);
+
+          final data = json.decode(res.body);
+
+          if(!data['success']) resp = data['msg'];
+
+          Usuario user = Usuario.fromJson(data['usuario']);
+          usuario = user;
+
+          if(res.statusCode == 401) {
+            return 'Sesion Expirada';
+          }
+          
+          return true;
+      } catch (e) {
+        print('Error: $e');
+        return resp;
+      }
+    } 
+
     static Future<String?> getUser() async {
       const storage = FlutterSecureStorage();
       final user = await storage.read(key: _keyStorage);
@@ -131,6 +164,8 @@ class UsuarioService  extends ChangeNotifier {
         var url = Uri.parse('${Environment.apiUrl}/user/update');
         final request = http.MultipartRequest('PUT', url);
 
+        request.headers['Authorization'] = usuario?.sessionToken ?? ''; 
+
         if(imagen != null) {
           request.files.add(http.MultipartFile(
             'image',
@@ -144,6 +179,10 @@ class UsuarioService  extends ChangeNotifier {
         final response = await request.send();
         
         autenticando = false;
+
+        if(response.statusCode == 401) {
+          await logout();
+        }
 
         return response.stream.transform(utf8.decoder);
 
@@ -196,10 +235,32 @@ class UsuarioService  extends ChangeNotifier {
         }
       }
 
-    Future logout(BuildContext context) async {
-      usuario = null;
-      await _storage.delete(key: _keyStorage);
-      if(!context.mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
+    Future logout() async {
+      
+      try {
+          var url = Uri.parse('${Environment.apiUrl}/user/logout');
+    
+          String body = json.encode({'id': usuario?.id});
+
+          usuario = null;
+          
+          await http.post(url, 
+            body: body,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          );
+
+          await _storage.delete(key: _keyStorage);
+
+          
+      } catch (e) {
+
+          print('Error: $e');
+
+      } finally {
+          Fluttertoast.showToast(msg: 'Sesion Expirada');
+          navigatorKey.currentState?.pushNamedAndRemoveUntil('login', (route) => false);
+      }
     }
 }

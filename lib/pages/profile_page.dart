@@ -28,10 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final surnameController = TextEditingController();
   final phoneController = TextEditingController();
 
-
-
   XFile? pickedFile;
-
   File? imageFile;
 
   @override
@@ -45,11 +42,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    UsuarioService usuarioService = Provider.of<UsuarioService>(context);
-
-    nameController.text = usuarioService.usuario?.nombre ?? '';
-    surnameController.text = usuarioService.usuario?.apellido ?? '';
-    phoneController.text = usuarioService.usuario?.telefono ?? '';
 
     return Scaffold(
      appBar: _appbar(),
@@ -82,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   _appbar() {
     return AppBar(
-      title: Text('Editar Perfil'),
+      title: const Text('Editar Perfil'),
     );
   }
 
@@ -92,7 +84,8 @@ class _ProfilePageState extends State<ProfilePage> {
       String surname = surnameController.text.trim();
       String name = nameController.text.trim(); 
       String phone = phoneController.text.trim();
-
+      String id = usuarioService.usuario!.id;
+      String? imagen = usuarioService.usuario?.imagen;
 
       final processDialog = ProgressDialog(context: context);
 
@@ -112,29 +105,37 @@ class _ProfilePageState extends State<ProfilePage> {
         nombre: name,
         apellido: surname,
         telefono: phone,
-        roles: []
+        roles: [],
+        imagen: imagen,
+        id: id
       );
 
 
     final registerOk = await usuarioService.updateWithImage(user, imageFile);
-    registerOk?.listen((res) {
+    registerOk?.listen((res) async {
       processDialog.close();
-      
       final responseApi = authResponseFromJson(res);
       Fluttertoast.showToast(msg: responseApi.msg ?? '');
 
+
       if(responseApi.success) {
+        
+        final resp = await usuarioService.getById(id);
+
+        if(!context.mounted) return;
+
+        if(resp != true) {
+          usuarioService.logout();
+          Fluttertoast.showToast(msg: resp);
+        } 
+
         Navigator.pushNamedAndRemoveUntil(context, 'products', (route) => false);
+
+      } else {
+        MySnackbar.show(context, responseApi.msg ?? '');
       }
       
     });
-
-    if(!context.mounted) return;
-    // if(registerOk == true) {
- 
-    // } else {
-    //   MySnackbar.show(context, 'error');
-    // }
   }
 
   _imageUserProfile() {
@@ -156,6 +157,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   _inputs() {
+    UsuarioService usuarioService = Provider.of<UsuarioService>(context, listen: false);
+
+    nameController.text = usuarioService.usuario?.nombre ?? '';
+    surnameController.text = usuarioService.usuario?.apellido ?? '';
+    phoneController.text = usuarioService.usuario?.telefono ?? '';
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
@@ -172,11 +179,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   prefixIcon: Icon(Icons.person, color: MyColors.primaryColor,),
                   hintText: 'Nombre',
               ),
-              onChanged: (value) {
-                setState(() {
-                  nameController.text = value;
-                });
-              },
+  
             ),
           ),
            Container(
@@ -191,11 +194,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   prefixIcon: Icon(Icons.person_outline, color: MyColors.primaryColor,),
                   hintText: 'Apellido',
               ),
-               onChanged: (value) {
-                setState(() {
-                  surnameController.text = value;
-                });
-              },
             ),
           ),
            Container(
@@ -211,11 +209,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   prefixIcon: Icon(Icons.phone, color: MyColors.primaryColor,),
                   hintText: 'Telefono',
               ),
-               onChanged: (value) {
-                setState(() {
-                  phoneController.text = value;
-                });
-              },
             ),
           ),
         ],
@@ -251,7 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
    AlertDialog alertDialog = AlertDialog(
       backgroundColor: Colors.white,
-      title: Text('Selecciona tu imagen'),
+      title: const Text('Selecciona tu imagen'),
       actions: [
         galleryButton,
         cameraButton

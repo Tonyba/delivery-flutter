@@ -18,8 +18,8 @@ class AuthResponse {
     });
 
     factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
-        success: json["success"],
-        usuario: Usuario.fromJson(json["usuario"]),
+        success: json["success"] != null ? true : false,
+        usuario: json['usuario'] != null ? Usuario.fromJson(json["usuario"]) : null,
         msg:  json["msg"]
     );
 

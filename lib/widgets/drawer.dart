@@ -11,6 +11,7 @@ class AppDrawer extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+
   final usuarioService = Provider.of<UsuarioService>(context);
     return Drawer(
       child: ListView(
@@ -84,8 +85,24 @@ class AppDrawer extends StatelessWidget {
               trailing: const Icon(Icons.person_outline))
                : const SizedBox()
             : const SizedBox(),
+          usuarioService.usuario != null 
+          ?  ModalRoute.of(context)!.settings.name!.contains('restaurant')
+            ? ListTile(
+              onTap: () =>  Navigator.pushNamed(context, 'restaurant/category/create'),
+              title: const Text('Crear Categoria') ,
+              trailing: const Icon(Icons.list_alt))
+               : const SizedBox()
+            : const SizedBox(),
+          usuarioService.usuario != null 
+          ?  ModalRoute.of(context)!.settings.name!.contains('restaurant')
+            ? ListTile(
+              onTap: () =>  Navigator.pushNamed(context, 'restaurant/product/create'),
+              title: const Text('Crear Producto') ,
+              trailing: const Icon(Icons.shopping_cart_sharp))
+               : const SizedBox()
+            : const SizedBox(),
           ListTile(
-              onTap: () => usuarioService.logout(context),
+              onTap: () => usuarioService.logout(),
               title: const Text('Cerrar Sesion') ,
               trailing: const Icon(Icons.power_settings_new),
           ),
