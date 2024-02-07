@@ -136,7 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if(responseApi.success) {
         MySnackbar.show(context, 'Registro completado correctamente');
         usuarioService.usuario = responseApi.usuario;
-        Navigator.pushNamedAndRemoveUntil(context, 'products', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
       } else {
         MySnackbar.show(context, responseApi.msg ?? '');
       }

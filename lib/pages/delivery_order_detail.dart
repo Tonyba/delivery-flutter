@@ -10,19 +10,19 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
 import '../models/producto.dart';
+import 'package:delivery_flutter/helpers/maps_helpers.dart';
 
-class OrderDetail extends StatefulWidget {
 
+class DeliveryOrderDetail extends StatefulWidget {
   final Pedido pedido;
-  const OrderDetail({super.key, required this.pedido});
+  const DeliveryOrderDetail({super.key, required this.pedido});
 
   @override
-  State<OrderDetail> createState() => _OrderDetailState();
+  State<DeliveryOrderDetail> createState() => _DeliveryOrderDetailState();
 }
 
-class _OrderDetailState extends State<OrderDetail> {
-
-  double total = 0.0;
+class _DeliveryOrderDetailState extends State<DeliveryOrderDetail> {
+   double total = 0.0;
   late PedidoService _pedidoService;
   late UsuarioService _usuarioService;
   List<Producto> _selectedProds = [];
@@ -60,35 +60,34 @@ class _OrderDetailState extends State<OrderDetail> {
 
   @override
   Widget build(BuildContext context) {  
-
-    return Scaffold(
-      appBar:  _appBar(),
-      body: _selectedProds.isNotEmpty 
-      ? ListView(
-        children: _selectedProds.map((Producto prod){
-          return _cardProduct(prod);
-        }).toList()
-      ) :const Center(child:  NoData(text: 'Ningun producto agregado')),
-      bottomNavigationBar: _selectedProds.isNotEmpty 
-      ? Container(
-        height: MediaQuery.of(context).size.height *  0.5,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Divider(
-                color: Colors.grey[400],
-                endIndent: 30,
-                indent: 30,
+      return Scaffold(
+            appBar:  _appBar(),
+            body: _selectedProds.isNotEmpty 
+            ? ListView(
+              children: _selectedProds.map((Producto prod){
+                return _cardProduct(prod);
+              }).toList()
+            ) :const Center(child:  NoData(text: 'Ningun producto agregado')),
+            bottomNavigationBar: _selectedProds.isNotEmpty 
+            ? Container(
+              height: MediaQuery.of(context).size.height *  0.5,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Divider(
+                      color: Colors.grey[400],
+                      endIndent: 30,
+                      indent: 30,
+                    ),
+                    _adminWidget(),
+                    _confirmOrder(), 
+                  ],
+                ),
               ),
-               _adminWidget(),
-              _usuarioService.selectedRole == 'RESTAURANTE' && widget.pedido.estado == 'PAGADO' ?   _confirmOrder() : const SizedBox(), 
-            ],
-          ),
-        ),
-      )
-      : const SizedBox()
-      ,
-    );
+            )
+            : const SizedBox()
+            ,
+          );
   }
 
 
@@ -310,19 +309,16 @@ class _OrderDetailState extends State<OrderDetail> {
     );
   }
 
-  _dispatchPedido() async {
+  _tomarPedido() async {
 
-      if(_idRepartidor != null) {
       setState(() {
         _submitting = true;
       });
 
-      widget.pedido.idRepartidor = _idRepartidor;
-
-      final resp = await _pedidoService.despacharPedido(widget.pedido);
+      final resp = await _pedidoService.tomarPedido(widget.pedido);
 
       if(resp == true) {
-        Fluttertoast.showToast(msg: 'Pedido Despachado', toastLength: Toast.LENGTH_LONG);
+        Fluttertoast.showToast(msg: 'Pedido Tomado', toastLength: Toast.LENGTH_LONG);
         Navigator.pop(context, true);
       } else {
         Fluttertoast.showToast(msg: resp);
@@ -331,21 +327,27 @@ class _OrderDetailState extends State<OrderDetail> {
       setState(() {
         _submitting = false;
       });
-    } else {
-      Fluttertoast.showToast(msg: 'Selecciona un Repartidor');
-    }
 
-    
+  }
 
+  _verEnMapa() {
 
+    launchGoogleMaps(widget.pedido.direccion?.lat ?? 0, widget.pedido.direccion?.lng ?? 0 );
   }
 
   _confirmOrder() {
     return Container(
       margin: const EdgeInsets.only(right: 30,left: 30, top: 15, bottom: 20),
       child: ElevatedButton(
-        onPressed: _submitting ? null : () => _dispatchPedido(),
+      
+        onPressed: _submitting 
+          ? null 
+          : widget.pedido.estado == 'DESPACHADO' 
+              ? () => _tomarPedido() 
+              : () => _verEnMapa(),
+
         style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
           padding: const EdgeInsets.symmetric(vertical: 5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12)
@@ -357,9 +359,9 @@ class _OrderDetailState extends State<OrderDetail> {
               child: Container(
                 alignment: Alignment.center,
                 height: 40,
-                child: const Text( 
-                  'DESPACHAR ORDEN',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                child: Text( 
+                  widget.pedido.estado == 'DESPACHADO' ? 'INICIAR ENTREGA' : 'VER EN MAPA',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
             ),
@@ -368,8 +370,8 @@ class _OrderDetailState extends State<OrderDetail> {
               child: Container(
                 margin: const EdgeInsets.only(left: 50, top: 4),
                 height: 30,
-                child: const Icon(
-                  Icons.check_circle, 
+                child: Icon(
+                  widget.pedido.estado == 'DESPACHADO' ? Icons.directions : Icons.map, 
                   color: Colors.white, 
                   size: 30
                 )
@@ -387,4 +389,5 @@ class _OrderDetailState extends State<OrderDetail> {
       actions: [_textTotalPrice(total)],
     );
   }
+  
 }

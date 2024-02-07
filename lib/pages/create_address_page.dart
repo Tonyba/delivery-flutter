@@ -104,6 +104,7 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
 
       Fluttertoast.showToast(msg: 'Direccion agregada correctamente');
       Navigator.pop(context, true);
+      _limpiarFormulario();
     } else {
       MySnackbar.show(context, resp);
     }
@@ -231,6 +232,14 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
     );
     
   }
+
+
+  _limpiarFormulario() {
+    refPositionController.clear();
+    addressController.clear();
+    address2Controller.clear();
+  }
+ 
 
     _buttonAccept() {
     return Container(

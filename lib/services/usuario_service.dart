@@ -24,6 +24,9 @@ class UsuarioService  extends ChangeNotifier {
     static const _storage = FlutterSecureStorage();
     static const _keyStorage = 'usuario';
 
+    bool get isRepartidor => _usuario?.roles?.indexWhere((rol) => rol.nombre == 'REPARTIDOR') != -1;
+    bool get isRestaurant => _usuario?.roles?.indexWhere((rol) => rol.nombre == 'RESTAURANTE') != -1;
+
     String get selectedRole {
 
       final roleLen = _usuario?.roles?.length;

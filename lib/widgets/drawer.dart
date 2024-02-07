@@ -18,6 +18,8 @@ class AppDrawer extends StatelessWidget {
     int? isRestaurant = usuarioService.usuario?.roles?.indexWhere((rol) => rol.nombre == 'RESTAURANTE');
     int? isRepartidor = usuarioService.usuario?.roles?.indexWhere((rol) => rol.nombre == 'REPARTIDOR');
 
+
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -77,11 +79,6 @@ class AppDrawer extends StatelessWidget {
               title: const Text('Editar perfil') ,
               trailing: const Icon(Icons.edit_outlined),
           ),
-          ListTile(
-              onTap: () => Navigator.pushNamed(context, 'orders'),
-              title: const Text('Mis pedidos') ,
-              trailing: const Icon(Icons.shopping_bag_outlined),
-          ),
           isRepartidor != null 
             ? isRepartidor != -1
               ? ListTile(
@@ -118,7 +115,7 @@ class AppDrawer extends StatelessWidget {
                : const SizedBox()
             : const SizedBox(),
           usuarioService.usuario != null 
-          ?  ModalRoute.of(context)!.settings.name!.contains('restaurant')
+          ?  isRestaurant != -1
             ? ListTile(
               onTap: () =>  Navigator.pushNamed(context, 'restaurant/product/create'),
               title: const Text('Crear Producto') ,

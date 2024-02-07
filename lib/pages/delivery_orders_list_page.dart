@@ -1,4 +1,5 @@
 
+import 'package:delivery_flutter/pages/delivery_order_detail.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -21,7 +22,7 @@ class DeliveryOrdersList extends StatefulWidget {
 }
 
 class _DeliveryOrdersListState extends State<DeliveryOrdersList> {
- final estados = ['PAGADO', 'DESPACHADO', 'EN CAMINO', 'ENTREGADO'];
+ final estados = ['DESPACHADO', 'EN CAMINO', 'ENTREGADO'];
 
   late PedidoService _pedidoService;
   late UsuarioService _usuarioService;
@@ -54,6 +55,7 @@ class _DeliveryOrdersListState extends State<DeliveryOrdersList> {
         
           drawer: const AppDrawer(),
           body: TabBarView(
+
             children: estados.map((String estado) {
               return FutureBuilder(
                 future: _getOrders(context, estado),
@@ -81,20 +83,22 @@ class _DeliveryOrdersListState extends State<DeliveryOrdersList> {
 
     _tabs() {
       return TabBar(
-                indicatorColor: MyColors.primaryColor,
-                labelColor: Colors.black,
-                unselectedLabelColor: Colors.grey[400],
-                isScrollable: true,
-                tabs:  List<Widget>.generate(estados.length, (index) {
-                  return Tab(
-                    child: Text(estados[index]),
-                  );
-                })
-      );
+                  tabAlignment: TabAlignment.start ,
+                  indicatorColor: MyColors.primaryColor,
+                  labelColor: Colors.black,              
+                  unselectedLabelColor: Colors.grey[400],
+                  isScrollable: true,
+                  tabs:  List<Widget>.generate(estados.length, (index) {
+                    return Tab(
+                      child: Text(estados[index]),
+                    );
+                  })
+        );
+      
   }
 
   Future<List<Pedido>?> _getOrders(BuildContext context, String estado) async {
-    return await _pedidoService.findByEstado(estado);
+    return await _pedidoService.findAssignPedidos(estado);
   } 
 
   Widget _cardOrder(Pedido pedido, BuildContext context) {
@@ -195,7 +199,7 @@ class _DeliveryOrdersListState extends State<DeliveryOrdersList> {
     isUpdate = await showModalBottomSheet(
       context: context, 
       isScrollControlled: true,
-      builder: (_) => OrderDetail(pedido: pedido,)
+      builder: (_) => DeliveryOrderDetail(pedido: pedido,)
     );
 
     if(isUpdate == true) {

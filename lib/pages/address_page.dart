@@ -2,6 +2,7 @@ import 'package:delivery_flutter/models/direccion.dart';
 import 'package:delivery_flutter/services/address_service.dart';
 import 'package:delivery_flutter/services/pedido_service.dart';
 import 'package:delivery_flutter/services/producto_service.dart';
+import 'package:delivery_flutter/widgets/my_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:delivery_flutter/services/usuario_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -154,12 +155,17 @@ class _AddressPageState extends State<AddressPage> {
     return addressList;
   }
 
+
   _noAddress() {
-    return Column(
-      children: [
-        const NoData(text: 'Agrega una nueva direccion'),
-        _buttonNewAddress(context)
-      ],
+    return Container(
+      width: double.infinity,
+      child: Column(
+        children: [
+          const SizedBox(height: 20,),
+          const NoData(text: 'Agrega una nueva direccion'),
+          _buttonNewAddress(context)
+        ],
+      ),
     );
   }
 
@@ -191,7 +197,9 @@ class _AddressPageState extends State<AddressPage> {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
       child: ElevatedButton(
-        onPressed: _submitting ? null : () => _createOrder(),
+        onPressed: _submitting 
+          ? null 
+          : () => _createOrder(),
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30)
@@ -210,10 +218,13 @@ class _AddressPageState extends State<AddressPage> {
 
   _createOrder() async {
 
+    if(addressList.isEmpty) {
+      MySnackbar.show(context, 'Agrega una direccion');
+    }
+
     setState(() {
       _submitting = true;
     });
-    
 
     Pedido pedido = Pedido(
       idUsuario: _usuarioService.usuario?.id ?? '', 
@@ -225,6 +236,7 @@ class _AddressPageState extends State<AddressPage> {
 
     if(resp == true) {
       Fluttertoast.showToast(msg: 'Pedido creado');
+      Navigator.pushNamedAndRemoveUntil(context, 'orders', (route) => false);
     }
 
     setState(() {

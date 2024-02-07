@@ -89,6 +89,7 @@ class ProductListPage extends StatelessWidget  {
     final categoriaService = Provider.of<CategoriaService>(context);
 
     return TabBar(
+              tabAlignment: TabAlignment.start ,
               indicatorColor: MyColors.primaryColor,
               labelColor: Colors.black,
               unselectedLabelColor: Colors.grey[400],

@@ -80,6 +80,7 @@ class _OrdersListPageState extends State<OrdersListPage> {
 
     _tabs() {
       return TabBar(
+                tabAlignment: TabAlignment.start ,
                 indicatorColor: MyColors.primaryColor,
                 labelColor: Colors.black,
                 unselectedLabelColor: Colors.grey[400],
@@ -93,7 +94,8 @@ class _OrdersListPageState extends State<OrdersListPage> {
   }
 
   Future<List<Pedido>?> _getOrders(BuildContext context, String estado) async {
-    return await _pedidoService.findByEstado(estado);
+    
+    return !_usuarioService.isRestaurant ? await _pedidoService.getPedidosClient(estado) : await _pedidoService.findByEstado(estado);
   } 
 
   Widget _cardOrder(Pedido pedido, BuildContext context) {
