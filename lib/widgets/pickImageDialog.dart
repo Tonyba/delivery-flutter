@@ -49,7 +49,7 @@ _showAlertDialog(context) {
 
     AlertDialog alertDialog = AlertDialog(
       backgroundColor: Colors.white,
-      title: Text('Selecciona tu imagen'),
+      title: const Text('Selecciona tu imagen'),
       actions: [
         galleryButton,
         cameraButton

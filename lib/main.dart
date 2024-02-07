@@ -22,9 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => UsuarioService(),
-        ),
+        ChangeNotifierProvider(create: (_) => UsuarioService()),
         ChangeNotifierProvider(create: (_) => CategoriaService(null)),
         ChangeNotifierProvider(create: (_) => ProductoService(null)),
         ChangeNotifierProxyProvider<UsuarioService, CategoriaService>(
@@ -40,7 +38,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Delivery App',
         routes: appRoutes,
-        initialRoute: 'products',
+        initialRoute: 'login',
         theme: appTheme,
         navigatorKey: navigatorKey,
       ),

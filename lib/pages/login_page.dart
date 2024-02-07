@@ -46,7 +46,7 @@ class LoginPage extends StatelessWidget {
 
                       if(loginOk == true) {
                         MySnackbar.show(context, 'logeado correctamente');
-                        if(usuarioService.usuario!.roles.length > 1) {
+                        if(usuarioService.usuario!.roles!.length > 1) {
                             Navigator.pushNamedAndRemoveUntil(context, 'roles', (route) => false);
                         } else {
                             Navigator.pushNamedAndRemoveUntil(context, 'products', (route) => false);

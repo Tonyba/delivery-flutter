@@ -6,12 +6,14 @@ import 'package:provider/provider.dart';
 class RolesPage extends StatelessWidget {
   const RolesPage({super.key});
 
+  static late UsuarioService _usuarioService;
+
   @override
   Widget build(BuildContext context) {
 
-    final userService = Provider.of<UsuarioService>(context);
+    _usuarioService = Provider.of<UsuarioService>(context);
 
-    final isEmpty = userService.usuario?.roles.isEmpty;
+    final isEmpty = _usuarioService.usuario?.roles!.isEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -21,7 +23,7 @@ class RolesPage extends StatelessWidget {
         margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.14),
         child: ListView(
           children: 
-             isEmpty != null && !isEmpty ? userService.usuario!.roles.map(
+             isEmpty != null && !isEmpty ? _usuarioService.usuario!.roles!.map(
               (rol) => _cardRol(context, rol)
               ).toList() 
               : [] 
@@ -29,9 +31,10 @@ class RolesPage extends StatelessWidget {
       ),
     );
   }
-}
 
-Widget _cardRol(BuildContext context, Rol rol) {
+
+  Widget _cardRol(BuildContext context, Rol rol) {
+
   return GestureDetector(
     onTap: () {
       Navigator.pushNamedAndRemoveUntil(context, rol.ruta, (route) => false);
@@ -62,3 +65,6 @@ Widget _cardRol(BuildContext context, Rol rol) {
     ),
   );
 }
+
+}
+

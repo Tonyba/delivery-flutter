@@ -84,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
       String surname = surnameController.text.trim();
       String name = nameController.text.trim(); 
       String phone = phoneController.text.trim();
-      String id = usuarioService.usuario!.id;
+      String id = usuarioService.usuario!.id ?? '';
       String? imagen = usuarioService.usuario?.imagen;
 
       final processDialog = ProgressDialog(context: context);

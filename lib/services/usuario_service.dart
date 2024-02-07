@@ -19,8 +19,31 @@ class UsuarioService  extends ChangeNotifier {
     Usuario? _usuario;
     bool _autenticando = false;
 
+    String _selectedRole = 'CLIENTE';
+
     static const _storage = FlutterSecureStorage();
     static const _keyStorage = 'usuario';
+
+    String get selectedRole {
+
+      final roleLen = _usuario?.roles?.length;
+       
+      switch (roleLen) {
+
+        case 2:
+          _selectedRole = 'REPARTIDOR';
+          break;
+
+        case 3:
+          _selectedRole = "RESTAURANTE";
+
+        default:
+         _selectedRole = 'CLIENTE';
+      }
+
+      return _selectedRole;
+    }
+
 
     UsuarioService()  {
       _initUser();
@@ -30,6 +53,7 @@ class UsuarioService  extends ChangeNotifier {
       String? savedUser = await getUser();
       if(savedUser != null && _usuario == null) {
         usuario = Usuario.fromJson(json.decode(savedUser));
+        await checkToken();
       }
     }
 
@@ -48,6 +72,66 @@ class UsuarioService  extends ChangeNotifier {
     }
 
 
+    Future getRepartidores() async {
+      try {
+        var url = Uri.parse('${Environment.apiUrl}/user/deliverymen');
+
+        final resp = await http.get(url, 
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': _usuario?.sessionToken ?? ''
+          }
+        );
+
+        if(resp.statusCode == 200) {
+          
+          final data = Usuario.fromJsonList(jsonDecode(resp.body));
+
+
+          return data.toList;
+         
+         
+        } else {
+          final respBody =  jsonDecode(resp.body);
+          print('Error: $respBody');
+          
+          return respBody['msg'];
+        }
+
+
+      } catch (e) {
+        print('Error: $e');
+      }
+    }
+
+
+    Future checkToken() async {
+        autenticando = true;
+        var url = Uri.parse('${Environment.apiUrl}/user/checkToken');
+
+        final resp = await http.get(url, 
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': _usuario?.sessionToken ?? ''
+          }
+        );
+
+        autenticando = false;
+
+        if(resp.statusCode == 200) {
+          
+          if(usuario != null) {         
+            navigatorKey.currentState?.pushNamedAndRemoveUntil(usuario!.roles!.length > 1 ? 'roles' : 'products', (route) => false);    
+          }
+           
+          return true;
+        } else {
+          await logout();
+          final respBody =  jsonDecode(resp.body);
+           print('Error: $respBody');
+          return respBody['msg'];
+        }
+    }
 
     Future login (String correo, String password) async {
         autenticando = true;
@@ -236,6 +320,11 @@ class UsuarioService  extends ChangeNotifier {
       }
 
     Future logout() async {
+
+
+      if(usuario == null) return;
+      Fluttertoast.showToast(msg: 'Sesion Expirada');
+      navigatorKey.currentState?.pushNamedAndRemoveUntil('login', (route) => false);
       
       try {
           var url = Uri.parse('${Environment.apiUrl}/user/logout');
@@ -255,12 +344,8 @@ class UsuarioService  extends ChangeNotifier {
 
           
       } catch (e) {
+        print('Error: $e');
+      } 
 
-          print('Error: $e');
-
-      } finally {
-          Fluttertoast.showToast(msg: 'Sesion Expirada');
-          navigatorKey.currentState?.pushNamedAndRemoveUntil('login', (route) => false);
-      }
     }
 }

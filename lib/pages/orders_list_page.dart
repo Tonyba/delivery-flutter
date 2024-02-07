@@ -1,27 +1,26 @@
-
+import 'package:delivery_flutter/helpers/relative_time_util.dart';
+import 'package:delivery_flutter/pages/order_detail.dart';
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 
+import 'package:delivery_flutter/models/pedido.dart';
+import 'package:delivery_flutter/services/pedido_service.dart';
+import 'package:delivery_flutter/services/usuario_service.dart';
+import 'package:delivery_flutter/theme/colors.dart';
 import 'package:delivery_flutter/widgets/drawer.dart';
 
-import 'package:delivery_flutter/services/pedido_service.dart';
-import '../services/usuario_service.dart';
 import '../widgets/noData.dart';
-import 'package:delivery_flutter/helpers/relative_time_util.dart';
-import 'package:delivery_flutter/models/pedido.dart';
-import 'package:delivery_flutter/pages/order_detail.dart';
-import 'package:delivery_flutter/theme/colors.dart';
 
-class DeliveryOrdersList extends StatefulWidget {
-  const DeliveryOrdersList({super.key});
+class OrdersListPage extends StatefulWidget {
+  const OrdersListPage({super.key});
 
   @override
-  State<DeliveryOrdersList> createState() => _DeliveryOrdersListState();
+  State<OrdersListPage> createState() => _OrdersListPageState();
 }
 
-class _DeliveryOrdersListState extends State<DeliveryOrdersList> {
- final estados = ['PAGADO', 'DESPACHADO', 'EN CAMINO', 'ENTREGADO'];
+class _OrdersListPageState extends State<OrdersListPage> {
+
+  final estados = ['PAGADO', 'DESPACHADO', 'EN CAMINO', 'ENTREGADO'];
 
   late PedidoService _pedidoService;
   late UsuarioService _usuarioService;

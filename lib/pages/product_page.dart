@@ -1,9 +1,11 @@
+import 'package:delivery_flutter/services/producto_service.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 
 import 'package:delivery_flutter/theme/colors.dart';
 import 'package:delivery_flutter/models/producto.dart';
+import 'package:provider/provider.dart';
 
 class ProductPage extends StatefulWidget {
 
@@ -18,11 +20,12 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
 
   int cantidad = 1;
-
+  ProductoService? _productService;
 
   @override
   Widget build(BuildContext context) {
 
+    _productService = Provider.of<ProductoService>(context);
     final prodImgs = [widget.producto.imagen!,  ...widget.producto.imagenes];
 
     return Scaffold(
@@ -44,7 +47,7 @@ class _ProductPageState extends State<ProductPage> {
     return Container(
       margin: const EdgeInsets.only(right: 30,left: 30, top: 20, bottom: 30),
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () => _addProduct(),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 5),
           shape: RoundedRectangleBorder(
@@ -91,8 +94,7 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   _addOrRemoveItem() {
-
-
+    
     return Container(
       margin: const EdgeInsets.only(left:19, right: 30),
       child: Row(
@@ -101,6 +103,7 @@ class _ProductPageState extends State<ProductPage> {
             onPressed: () {
               setState(() {
                 cantidad++;
+                widget.producto.quantity = cantidad;
               });
             }, 
             icon: const Icon(Icons.add_circle_outline, size: 30,),
@@ -118,8 +121,9 @@ class _ProductPageState extends State<ProductPage> {
           IconButton(
             onPressed: () {
                setState(() {
-                if(cantidad - 1 < 0) return;
+                if(cantidad - 1 < 1) return;
                 cantidad--;
+                widget.producto.quantity = cantidad;
               });
             }, 
             icon: const Icon(Icons.remove_circle_outline, size: 30,),
@@ -129,7 +133,7 @@ class _ProductPageState extends State<ProductPage> {
           Container(
             margin: const EdgeInsets.only(right: 10),
             child: Text(
-              '${widget.producto.precio}\$',
+              '${(widget.producto.precio * cantidad ).toStringAsFixed(2)}\$',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold
@@ -198,5 +202,9 @@ class _ProductPageState extends State<ProductPage> {
         )
       ],
     );
+  }
+
+  _addProduct() async {
+    await _productService?.selectProd(widget.producto);
   }
 }

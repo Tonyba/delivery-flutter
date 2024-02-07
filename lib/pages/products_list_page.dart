@@ -34,7 +34,7 @@ class ProductListPage extends StatelessWidget  {
             child: AppBar(
               automaticallyImplyLeading: false,
               backgroundColor: Colors.white,
-              actions: [_shoppingBag()],
+              actions: [_shoppingBag(context)],
               flexibleSpace: Column(
                 children: [
                   const SizedBox(height: 40,),
@@ -217,29 +217,34 @@ class ProductListPage extends StatelessWidget  {
     );
   }
 
-  _shoppingBag() {
-    return  Stack(
-      children: [
-        Container(
-          margin: const EdgeInsets.only(right: 15),
-          child: const  Icon(
-            Icons.shopping_bag_outlined, 
-            color: Colors.black,
-          ),
-        ),
-        Positioned(
-          right: 16,
-          child: Container(
-            width: 9,
-            height: 9,
-            decoration: const BoxDecoration(
-              color: Colors.green,
-              borderRadius: BorderRadius.all(Radius.circular(30))
+  _shoppingBag(context) {
+    return  GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, 'cart');
+      },
+      child: Stack(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(right: 15),
+            child: const  Icon(
+              Icons.shopping_bag_outlined, 
+              color: Colors.black,
             ),
-          )
-        ),
-
-      ],
+          ),
+          Positioned(
+            right: 16,
+            child: Container(
+              width: 9,
+              height: 9,
+              decoration: const BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.all(Radius.circular(30))
+              ),
+            )
+          ),
+      
+        ],
+      ),
     );
   }
 }

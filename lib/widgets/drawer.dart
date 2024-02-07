@@ -12,7 +12,12 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-  final usuarioService = Provider.of<UsuarioService>(context);
+
+    final usuarioService = Provider.of<UsuarioService>(context);
+
+    int? isRestaurant = usuarioService.usuario?.roles?.indexWhere((rol) => rol.nombre == 'RESTAURANTE');
+    int? isRepartidor = usuarioService.usuario?.roles?.indexWhere((rol) => rol.nombre == 'REPARTIDOR');
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -73,12 +78,31 @@ class AppDrawer extends StatelessWidget {
               trailing: const Icon(Icons.edit_outlined),
           ),
           ListTile(
-              onTap: () {},
+              onTap: () => Navigator.pushNamed(context, 'orders'),
               title: const Text('Mis pedidos') ,
               trailing: const Icon(Icons.shopping_bag_outlined),
           ),
+          isRepartidor != null 
+            ? isRepartidor != -1
+              ? ListTile(
+                  onTap: () => Navigator.pushNamed(context, 'delivery/orders/list'),
+                  title: const Text('Pedidos Asignados') ,
+                  trailing: const Icon(Icons.directions_bike),
+              )
+              : const SizedBox()
+            : const SizedBox(),
+          ListTile(
+              onTap: () => Navigator.pushNamed(context, 'orders'),
+              title: const Text( 'Mis pedidos') ,
+              trailing: const Icon(Icons.shopping_bag_outlined),
+          ),
+           ListTile(
+              onTap: () => Navigator.pushNamed(context, 'products'),
+              title: const Text('Productos') ,
+              trailing: const Icon(Icons.shopify),
+          ),
           usuarioService.usuario != null 
-          ?  usuarioService.usuario!.roles.length > 1 
+          ?  usuarioService.usuario!.roles!.length > 1 
             ? ListTile(
               onTap: () =>  Navigator.pushNamedAndRemoveUntil(context, 'roles', (route) => false),
               title: const Text('Seleccionar Rol') ,
@@ -86,7 +110,7 @@ class AppDrawer extends StatelessWidget {
                : const SizedBox()
             : const SizedBox(),
           usuarioService.usuario != null 
-          ?  ModalRoute.of(context)!.settings.name!.contains('restaurant')
+          ?  isRestaurant != -1
             ? ListTile(
               onTap: () =>  Navigator.pushNamed(context, 'restaurant/category/create'),
               title: const Text('Crear Categoria') ,

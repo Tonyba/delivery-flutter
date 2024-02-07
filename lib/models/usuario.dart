@@ -7,16 +7,18 @@ Usuario usuarioFromJson(String str) => Usuario.fromJson(json.decode(str));
 String usuarioToJson(Usuario data) => json.encode(data.toJson());
 
 class Usuario {
-    String id;
-    String nombre;
-    String apellido;
-    String correo;
-    String telefono;
+    String? id;
+    String? nombre;
+    String? apellido;
+    String? correo;
+    String? telefono;
     String? imagen;
-    String password;
+    String? password;
     bool? disponible;
     String? sessionToken;
-    List<Rol> roles;
+    List<Rol>? roles = [];
+
+    List<Usuario> toList = [];
     
     Usuario({
         this.id = '',
@@ -42,6 +44,16 @@ class Usuario {
         sessionToken: json["session_token"],
         roles: json['roles'] == null ? [] : List<Rol>.from(json['roles'].map( (model) => Rol.fromJson(model) ))
     );
+
+    Usuario.fromJsonList(List<dynamic>? jsonList) {
+      if(jsonList == null) return;
+
+      jsonList.forEach((item) { 
+        Usuario usuario = Usuario.fromJson(item);
+        toList.add(usuario);
+      });
+
+    }
 
     Map<String, dynamic> toJson() => {
         "id": id,
