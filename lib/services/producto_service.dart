@@ -23,25 +23,22 @@ class ProductoService extends ChangeNotifier {
 
   bool _submitting = false;
   bool get submitting => _submitting;
-    set submitting(bool valor) {
-      _submitting = valor;
-      notifyListeners();
+  set submitting(bool valor) {
+    _submitting = valor;
+    notifyListeners();
   }
-
 
   List<Producto> _selectedProds = [];
   List<Producto> get selectedProds => _selectedProds;
 
-  
   double get total {
     _total = 0;
-    _selectedProds.forEach((prod) { 
+    _selectedProds.forEach((prod) {
       _total += (prod.quantity ?? 1) * prod.precio;
     });
 
     return _total;
   }
-
 
   ProductoService(this._usuarioService) {
     initSelectedProds();
@@ -50,22 +47,29 @@ class ProductoService extends ChangeNotifier {
   void initSelectedProds() async {
     final savedProds = await getSelected();
     _selectedProds = savedProds;
-   // await clearBag();
+    // await clearBag();
 
-    notifyListeners(); 
+    notifyListeners();
   }
 
-  int getProdQuantity(String id)  {
+  int getProdQuantity(String id) {
     final prod = _selectedProds.firstWhereOrNull((element) => element.id == id);
     return prod?.quantity ?? 1;
-  } 
+  }
+
+  Producto? getProduct(Producto prodToFind) {
+    final prod = _selectedProds
+        .firstWhereOrNull((element) => element.id == prodToFind.id);
+    return prod;
+  }
 
   Future<void> selectProd(Producto prod) async {
+    final prodExist =
+        _selectedProds.indexWhere((element) => element.id == prod.id);
 
-    final prodExist = _selectedProds.indexWhere((element) => element.id == prod.id);
-
-    if(prodExist != -1) {
+    if (prodExist != -1) {
       await updateProd(prod.quantity ?? 1, prod);
+      Fluttertoast.showToast(msg: 'Producto en carrito actualizado');
       return;
     }
 
@@ -76,12 +80,11 @@ class ProductoService extends ChangeNotifier {
   }
 
   Future updateProd(int qty, Producto prod) async {
+    if (prod.quantity != null) {
+      final prodExist =
+          _selectedProds.indexWhere((element) => element.id == prod.id);
 
-    if((prod.quantity ?? 1) > 1) {
-      final prodExist = _selectedProds.indexWhere((element) => element.id == prod.id);
-      _selectedProds[prodExist].quantity = qty;
-      
-      print(_selectedProds[prodExist].quantity);
+      _selectedProds[prodExist].quantity = prod.quantity;
 
       await saveSelected(productoListToJson(_selectedProds));
     }
@@ -90,31 +93,29 @@ class ProductoService extends ChangeNotifier {
   }
 
   Future<List<Producto>?> findByCat(String catId) async {
-
     try {
-       var url = Uri.parse('${Environment.apiUrl}/product/all/$catId');
-       Map<String, String> headers = {
-          'Content-type': 'application/json',
-          'Authorization': _usuarioService?.usuario?.sessionToken ?? ''
-       };
+      var url = Uri.parse('${Environment.apiUrl}/product/all/$catId');
+      Map<String, String> headers = {
+        'Content-type': 'application/json',
+        'Authorization': _usuarioService?.usuario?.sessionToken ?? ''
+      };
 
-        final resp = await http.get(url, headers: headers);
+      final resp = await http.get(url, headers: headers);
 
-        if(resp.statusCode == 401) {
-          await _usuarioService?.logout();
-          return null;
-        }
+      if (resp.statusCode == 401) {
+        await _usuarioService?.logout();
+        return null;
+      }
 
-        if(resp.statusCode != 200) {
-          return null;
-        }
+      if (resp.statusCode != 200) {
+        return null;
+      }
 
-        final data = json.decode(resp.body);
-        
-        final prodRes = Producto.fromJsonList(data['data']);
+      final data = json.decode(resp.body);
 
-        return prodRes.toList;
+      final prodRes = Producto.fromJsonList(data['data']);
 
+      return prodRes.toList;
     } catch (e) {
       print('Error: $e');
       return null;
@@ -122,30 +123,28 @@ class ProductoService extends ChangeNotifier {
   }
 
   Future createProd(Producto producto, List<File> images) async {
-      submitting = true;
+    submitting = true;
     try {
       var url = Uri.parse('${Environment.apiUrl}/product/create');
 
       final request = http.MultipartRequest('POST', url);
 
-      request.headers['Authorization'] = _usuarioService?.usuario?.sessionToken ?? '';
+      request.headers['Authorization'] =
+          _usuarioService?.usuario?.sessionToken ?? '';
 
       for (int i = 0; i < images.length; i++) {
         request.files.add(http.MultipartFile(
-          'image',
-          http.ByteStream(images[i].openRead().cast()),
-          await images[i].length(),
-          filename: p.basename(images[i].path)
-        ));
+            'image',
+            http.ByteStream(images[i].openRead().cast()),
+            await images[i].length(),
+            filename: p.basename(images[i].path)));
       }
 
+      request.fields['producto'] = jsonEncode(producto);
 
-       request.fields['producto'] = jsonEncode(producto);
+      final response = await request.send();
 
-       final response = await request.send();
-
-       return response.stream.transform(utf8.decoder);
-
+      return response.stream.transform(utf8.decoder);
     } catch (e) {
       print('Error $e');
     } finally {
@@ -159,16 +158,17 @@ class ProductoService extends ChangeNotifier {
 
   Future<List<Producto>> getSelected() async {
     final selectedProds = await _storage.read(key: _keyStorage);
-    if(selectedProds == null) return [];
+    if (selectedProds == null) return [];
+
     final decoded = jsonDecode(selectedProds);
 
     final prods = Producto.fromJsonList(decoded);
 
     return prods.toList;
   }
-  
+
   Future<void> removeFromBag(String id) async {
-    _selectedProds.removeWhere((prod) => prod.id == id );
+    _selectedProds.removeWhere((prod) => prod.id == id);
     await saveSelected(productoListToJson(_selectedProds));
     notifyListeners();
   }
@@ -176,5 +176,4 @@ class ProductoService extends ChangeNotifier {
   Future<void> clearBag() async {
     await _storage.delete(key: _keyStorage);
   }
-
 }
