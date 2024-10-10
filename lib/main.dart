@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,11 +25,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CategoriaService(null)),
         ChangeNotifierProvider(create: (_) => ProductoService(null)),
         ChangeNotifierProxyProvider<UsuarioService, CategoriaService>(
-          update: (_, usuarioService, categoriaService) => CategoriaService(usuarioService),
+          update: (_, usuarioService, categoriaService) =>
+              CategoriaService(usuarioService),
           create: (_) => CategoriaService(null),
         ),
         ChangeNotifierProxyProvider<UsuarioService, ProductoService>(
-          update: (_, usuarioService, categoriaService) => ProductoService(usuarioService),
+          update: (_, usuarioService, categoriaService) =>
+              ProductoService(usuarioService),
           create: (_) => ProductoService(null),
         )
       ],
@@ -45,4 +46,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

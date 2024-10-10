@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   http: ^1.2.0
+  connectivity_plus: ^3.0.6
   provider: ^6.1.1
   lottie: ^2.7.0
   flutter_secure_storage: ^9.0.0
